@@ -2,7 +2,9 @@ package main
 
 import (
 	"embed"
+	"log"
 
+	"github.com/joho/godotenv"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -13,10 +15,15 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	app := NewApp()
 
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:  "trading",
 		Width:  1024,
 		Height: 868,

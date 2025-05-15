@@ -1,189 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Trading</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Simulator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- TradingView Widget JavaScript -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        .section {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        .crypto-card {
+            transition: transform 0.3s;
+        }
+        .crypto-card:hover {
+            transform: translateY(-5px);
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .balance-card {
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            color: white;
+        }
+        .autocomplete-items {
+            position: absolute;
+            z-index: 1000;
+            background-color: white;
+            border-top: none;
+            width: 100%;
+        }
+            .autocomplete-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+            .autocomplete-item:hover {
+            background-color: #e9ecef;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">ts pmo (trading system performance monitoring office)</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                </ul>
-
-                <div id="SudahLoginNavbar" class="d-none">
-                    <span class="text-light me-3" id="username_navbar">Rafi</span>
-                    <a href="/logout" class="btn btn-outline-light">Logout</a>
-                </div>
-
-                <div id="BelumLoginNavbar">
-                    <a href="/login" class="btn btn-outline-light">Login</a>
-                </div>
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-currency-bitcoin me-2"></i>ts pmo (trading system performance monitoring office)</a>
+            <div class="d-flex">
+                <button id="loginBtn" class="btn btn-outline-light me-2">Login</button>
+                <button id="registerBtn" class="btn btn-outline-light me-2">Register</button>
+                <button id="indexBtn" class="btn btn-outline-light">Trading Dashboard</button>
+                <button id="logoutBtn" class="btn btn-outline-light d-none">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
             </div>
         </div>
     </nav>
-      
-    <div id="HomePage" class="d-none">
-        <div class="tradingview-widget-container">
-            <div id="chart"></div>
-        </div>
 
-        <div class="container mt-3 portfolio-container">
-            <div class="row">
-                <!-- User Balance -->
-                <div class="col-md-12">
-                    <div class="card text-center mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Available Balance</h5>
-                            <h2 class="fw-bold text-success" id="Uang">$ {{ .Balance }}</h2>
+    <!-- Login Section -->
+    <section id="loginSection" class="section container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Login</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="loginUsername" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="loginUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </form>
+                        <div class="text-center mt-3">
+                            <p>Don't have an account? <a href="#" id="goToRegister">Register here</a></p>
                         </div>
                     </div>
                 </div>
-        
-                <!-- Portfolio Assets -->
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Your Portfolio</h4>
-                            <table class="table table-dark table-striped">
+            </div>
+        </div>
+    </section>
+
+    <!-- Register Section -->
+    <section id="registerSection" class="section container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">Register</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="registerUsername" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="registerUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="registerEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="registerPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Register</button>
+                        </form>
+                        <div class="text-center mt-3">
+                            <p>Already have an account? <a href="#" id="goToLogin">Login here</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Index (Trading Dashboard) Section -->
+    <section id="indexSection" class="section container py-4">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>Trading Dashboard</h2>
+            </div>
+        </div>
+
+        <!-- User Balance -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card balance-card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Your Balance</h5>
+                        <h2 class="card-text">$<span id="userBalance">10000.00</span></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Portfolio Value</h5>
+                        <h2 class="card-text">$<span id="portfolioValue">0.00</span></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TradingView Chart Widget -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Market Chart</h5>
+                        <select id="chartSymbolSelector" class="form-select" style="width: auto;">
+                            <option value="GOLD">GOLD</option>
+                        </select>
+                    </div>
+                    <div class="card-body" style="height: 500px;">
+                      <div>
+                        <div id="tradingview_widget_container" style="height: 400px;"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cryptocurrency Management -->
+         <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <h5 class="mb-0">Cryptocurrency List</h5>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="hstack gap-3">
+                                    <div class="input-group ms-auto" style="max-width: 250px;">
+                                        <input type="text" id="cryptoSearch" class="form-control" placeholder="Search by name...">
+                                        <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-sort-down"></i> Sort Crypto
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+                                            <li><a class="dropdown-item sort-option" data-sort="name-asc" href="#">Name (A-Z)</a></li>
+                                            <li><a class="dropdown-item sort-option" data-sort="name-desc" href="#">Name (Z-A)</a></li>
+                                            <li><a class="dropdown-item sort-option" data-sort="price-asc" href="#">Price (Low-High)</a></li>
+                                            <li><a class="dropdown-item sort-option" data-sort="price-desc" href="#">Price (High-Low)</a></li>
+                                            <li><a class="dropdown-item sort-option" data-sort="marketCap-asc" href="#">Market Cap (Low-High)</a></li>
+                                            <li><a class="dropdown-item sort-option" data-sort="marketCap-desc" href="#">Market Cap (High-Low)</a></li>
+                                            <li><a class="dropdown-item sort-option" data-sort="change-asc" href="#">Change (Low-High)</a></li>
+                                            <li><a class="dropdown-item sort-option" data-sort="change-desc" href="#">Change (High-Low)</a></li>
+                                        </ul>
+                                    </div>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCryptoModal">
+                                        <i class="bi bi-plus-circle me-1"></i>Add Cryptocurrency
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Asset</th>
-                                        <th>Quantity</th>
-                                        <th>Value</th>
-                                        <th>Date</th>
+                                        <th>Name</th>
+                                        <th>Symbol</th>
+                                        <th>Price (USD)</th>
+                                        <th>Market Cap (USD)</th>
+                                        <th>24h Change</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <div>
-                                    <h2 class="fw-bold text-success" id="UangPortfolio">100</h2>
-                                    <tbody id="Portfolio">
-                                    </tbody>
-                                </div>
+                                <tbody id="cryptoList">
+                                    <!-- Cryptocurrency list will be populated here -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-        
-                <!-- Buy Button -->
-                <div class="col-md-12 text-center mt-4 mb-3">
-                    <button id="TombolBeliModal" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#beliModal">Buy BTC</button>
-                    <button id="TombolJualModal" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#jualModal">Sell BTC</button>
+            </div>
+        </div>
+
+        <!-- User Portfolio -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">Your Portfolio</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Cryptocurrency</th>
+                                        <th>Amount</th>
+                                        <th>Value (USD)</th>
+                                        <th>Profit (USD)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="portfolioList">
+                                    <!-- Portfolio will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="LoginPage">
-        <div class="d-flex align-items-center justify-content-center" style="height: 80vh;">
-            <div class="login-container">
-                <h3 class="text-center mb-3">Login</h3>
-                <form>
-                    <h3 class="d-none" style="color: red;" id="status_login"></h3>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username_login" name="username_login" required>
+        <!-- Transaction History -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">Transaction History</h5>
                     </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password_login" name="password_login" min="8" required>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Cryptocurrency</th>
+                                        <th>Amount</th>
+                                        <th>Price (USD)</th>
+                                        <th>Total (USD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionHistory">
+                                    <!-- Transaction history will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <button id="submit_login" class="btn btn-primary w-100">Login</button>
-                </form>
-                <p class="mt-3 text-center">
-                    Don't have an account? <a href="/register">Register</a>
-                </p>
-            </div>
-        </div>       
-    </div>
-
-    <div id="RegisterPage" class="d-none">
-        <div class="d-flex align-items-center justify-content-center" style="height: 80vh;">
-            <div class="register-container">
-                <h3 class="text-center mb-4">Register</h3>
-                <form>
-                    <h3 class="d-none" style="color: red;" id="status_register"></h3>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username_register" name="username" min="3" max="20" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email_register" name="email" min="3" max="50" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password_register" name="password" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="confirm_password_register" name="confirm_password" required>
-                    </div>
-                    <button id="submit_register" class="btn btn-primary w-100">Register</button>
-                </form>
-                <p class="mt-3 text-center">
-                    Already have an account? <a href="/login">Login</a>
-                </p>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="modal fade" id="beliModal" tabindex="-1" aria-labelledby="beliBitcoin" aria-hidden="true" data-bs-theme="dark">
+    <!-- Add Cryptocurrency Modal -->
+    <div class="modal fade" id="addCryptoModal" tabindex="-1" aria-labelledby="addCryptoModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Buy BTC</h5>
+                    <h5 class="modal-title" id="addCryptoModalLabel">Add Cryptocurrency</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>How much do you want to buy?</p>
-                    <label for="customRange1" class="form-label" id="JumlahBeli">Bitcoin: 0</label>
-                    <p id="StatusBeli" class="d-none text-success">Success!</p>
-                    <input type="range" class="form-range" id="RangeBeli" value="0" min="0" max="1" step=".00001">
+                    <form id="addCryptoForm" class="form-group">
+                        <div class="mb-3">
+                            <label for="cryptoName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="cryptoName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cryptoID" class="form-label">ID</label>
+                            <div class="d-flex">
+                                <input type="text" class="form-control" id="cryptoID" required autocomplete="off">
+                                <a class="btn btn-primary ms-2" id="verifikasiCrypto">Verify</a>
+                            </div>
+                            <div id="autocompleteList" class="autocomplete-items"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cryptoSymbol" class="form-label">Symbol</label>
+                            <input type="text" class="form-control" id="cryptoSymbol" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cryptoPrice" class="form-label">Price (USD)</label>
+                            <input type="number" class="form-control" id="cryptoPrice" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cryptoMarketCap" class="form-label">Market Cap (USD)</label>
+                            <input type="number" class="form-control" id="cryptoMarketCap" step="1" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cryptoChange" class="form-label">24h Change (%)</label>
+                            <input type="number" class="form-control" id="cryptoChange" step="0.01" required>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button id="TombolBeli" type="button" class="btn btn-primary">Buy</but>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal fade" id="jualModal" tabindex="-1" aria-labelledby="jualBitcoin" aria-hidden="true" data-bs-theme="dark">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sell BTC</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>How much do you want to sell?</p>
-                    <label for="customRange1" class="form-label" id="JumlahJual">Bitcoin: 0</label>
-                    <br>
-                    <label for="customRange1" class="form-label" id="JumlahJualBitcoin">Bitcoin: 0</label>
-                    <p id="StatusJual" class="d-none text-success">Success!</p>
-                    <input type="range" class="form-range" id="RangeJual" value="0" min="0" max="1" step=".1">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button id="TombolJual" type="button" class="btn btn-primary">Sell</but>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveCryptoBtn">Add</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://s3.tradingview.com/tv.js"></script>
-    <script
-			  src="https://code.jquery.com/jquery-3.7.1.js"
-			  integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-			  crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Edit Cryptocurrency Modal -->
+    <div class="modal fade" id="editCryptoModal" tabindex="-1" aria-labelledby="editCryptoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCryptoModalLabel">Edit Cryptocurrency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCryptoForm">
+                        <input type="hidden" id="editCryptoId">
+                        <div class="mb-3">
+                            <label for="editCryptoName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="editCryptoName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCryptoSymbol" class="form-label">Symbol</label>
+                            <input type="text" class="form-control" id="editCryptoSymbol" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCryptoPrice" class="form-label">Price (USD)</label>
+                            <input type="number" class="form-control" id="editCryptoPrice" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCryptoChange" class="form-label">24h Change (%)</label>
+                            <input type="number" class="form-control" id="editCryptoChange" step="0.01" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateCryptoBtn">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buy Cryptocurrency Modal -->
+    <div class="modal fade" id="buyCryptoModal" tabindex="-1" aria-labelledby="buyCryptoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="buyCryptoModalLabel">Buy Cryptocurrency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="buyCryptoForm">
+                        <input type="hidden" id="buyCryptoId">
+                        <div class="mb-3">
+                            <label for="buyCryptoName" class="form-label">Cryptocurrency</label>
+                            <input type="text" class="form-control" id="buyCryptoName" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="buyCryptoPrice" class="form-label">Current Price (USD)</label>
+                            <input type="text" class="form-control" id="buyCryptoPrice" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="buyAmount" class="form-label">Amount to Buy</label>
+                            <input type="number" class="form-control" id="buyAmount" step=".001" value="0" required>
+                            <input type="range" class="form-range" id="buySliderAmount" value="0" min="0" step="0.00001" max="1" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="buyTotal" class="form-label">Total Cost (USD)</label>
+                            <input type="text" class="form-control" id="buyTotal" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="confirmBuyBtn">Buy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sell Cryptocurrency Modal -->
+    <div class="modal fade" id="sellCryptoModal" tabindex="-1" aria-labelledby="sellCryptoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sellCryptoModalLabel">Sell Cryptocurrency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sellCryptoForm">
+                        <input type="hidden" id="sellCryptoId">
+                        <div class="mb-3">
+                            <label for="sellCryptoName" class="form-label">Cryptocurrency</label>
+                            <input type="text" class="form-control" id="sellCryptoName" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sellCryptoPrice" class="form-label">Current Price (USD)</label>
+                            <input type="text" class="form-control" id="sellCryptoPrice" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sellAvailable" class="form-label">Available Amount</label>
+                            <input type="text" class="form-control" id="sellAvailable" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sellAmount" class="form-label">Amount to Sell</label>
+                            <input type="number" class="form-control" id="sellAmount" step="0.0001" min="0.0001" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sellTotal" class="form-label">Total Value (USD)</label>
+                            <input type="text" class="form-control" id="sellTotal" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmSellBtn">Sell</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./src/main.js" type="module"></script>
 </body>
 </html>

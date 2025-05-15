@@ -1,4 +1,4 @@
-export namespace main {
+export namespace models {
 	
 	export class Akun {
 	    id: number;
@@ -21,6 +21,54 @@ export namespace main {
 	        this.password_hash = source["password_hash"];
 	        this.full_name = source["full_name"];
 	        this.uang = source["uang"];
+	        this.created_at = source["created_at"];
+	    }
+	}
+	export class Kripto {
+	    id: number;
+	    kuripto_id: string;
+	    nama: string;
+	    simbol: string;
+	    harga: number;
+	    market_cap: number;
+	    change_24h: number;
+	    apakah_asli: boolean;
+	    created_at: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Kripto(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.kuripto_id = source["kuripto_id"];
+	        this.nama = source["nama"];
+	        this.simbol = source["simbol"];
+	        this.harga = source["harga"];
+	        this.market_cap = source["market_cap"];
+	        this.change_24h = source["change_24h"];
+	        this.apakah_asli = source["apakah_asli"];
+	        this.created_at = source["created_at"];
+	    }
+	}
+	export class Portfolio {
+	    id: number;
+	    akun_id: number;
+	    jumlah: number;
+	    mata_uang: string;
+	    created_at: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Portfolio(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.akun_id = source["akun_id"];
+	        this.jumlah = source["jumlah"];
+	        this.mata_uang = source["mata_uang"];
 	        this.created_at = source["created_at"];
 	    }
 	}
@@ -56,12 +104,12 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class StatusTransksi {
+	export class StatusTransaksi {
 	    status: string;
 	    akun: Akun;
 	
 	    static createFrom(source: any = {}) {
-	        return new StatusTransksi(source);
+	        return new StatusTransaksi(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -91,7 +139,9 @@ export namespace main {
 	export class Transaksi {
 	    id: number;
 	    akun_id: number;
+	    tipe: string;
 	    jumlah: number;
+	    harga: number;
 	    mata_uang: string;
 	    created_at: string;
 	
@@ -103,7 +153,9 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.akun_id = source["akun_id"];
+	        this.tipe = source["tipe"];
 	        this.jumlah = source["jumlah"];
+	        this.harga = source["harga"];
 	        this.mata_uang = source["mata_uang"];
 	        this.created_at = source["created_at"];
 	    }

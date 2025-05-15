@@ -6,16 +6,28 @@ export function Beli(arg1, arg2) {
   return window['go']['main']['App']['Beli'](arg1, arg2);
 }
 
+export function BuatKripto(arg1) {
+  return window['go']['main']['App']['BuatKripto'](arg1);
+}
+
 export function DapatinAkun() {
   return window['go']['main']['App']['DapatinAkun']();
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
+export function EditKripto(arg1) {
+  return window['go']['main']['App']['EditKripto'](arg1);
+}
+
+export function HapusKripto(arg1) {
+  return window['go']['main']['App']['HapusKripto'](arg1);
 }
 
 export function Jual(arg1, arg2) {
   return window['go']['main']['App']['Jual'](arg1, arg2);
+}
+
+export function Kripto() {
+  return window['go']['main']['App']['Kripto']();
 }
 
 export function Login(arg1, arg2) {
@@ -28,4 +40,8 @@ export function Portfolio() {
 
 export function Register(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['Register'](arg1, arg2, arg3, arg4);
+}
+
+export function Transaksi() {
+  return window['go']['main']['App']['Transaksi']();
 }

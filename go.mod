@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/carlmjohnson/requests v0.24.3
+	github.com/joho/godotenv v1.5.1
 	github.com/nedpals/supabase-go v0.5.0
 	github.com/wailsapp/wails/v2 v2.10.0
 	golang.org/x/crypto v0.33.0
