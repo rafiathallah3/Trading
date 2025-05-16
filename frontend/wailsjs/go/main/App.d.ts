@@ -14,7 +14,7 @@ export function HapusKripto(arg1:string):Promise<string>;
 
 export function Jual(arg1:string,arg2:string):Promise<models.StatusTransaksi>;
 
-export function Kripto():Promise<Array<models.Kripto>>;
+export function Kripto(arg1:string,arg2:string):Promise<Array<models.Kripto>>;
 
 export function Login(arg1:string,arg2:string):Promise<models.StatusAutentikasi>;
 

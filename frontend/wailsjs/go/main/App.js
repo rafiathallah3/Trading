@@ -26,8 +26,8 @@ export function Jual(arg1, arg2) {
   return window['go']['main']['App']['Jual'](arg1, arg2);
 }
 
-export function Kripto() {
-  return window['go']['main']['App']['Kripto']();
+export function Kripto(arg1, arg2) {
+  return window['go']['main']['App']['Kripto'](arg1, arg2);
 }
 
 export function Login(arg1, arg2) {

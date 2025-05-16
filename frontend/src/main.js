@@ -76,40 +76,7 @@ function loadTradingViewWidget(symbol = 'GOLD') {
 }
 
 let currentSearchTerm = '';
-let currentSortOption = 'name-asc';
-
-function filterCryptocurrencies() {
-    const searchTerm = currentSearchTerm.toLowerCase();
-    const [sortField, sortDirection] = currentSortOption.split('-');
-    
-    // Filter by search term
-    let filteredCryptos = cryptocurrencies;
-    if (searchTerm) {
-        filteredCryptos = cryptocurrencies.filter(crypto => 
-            crypto.name.toLowerCase().includes(searchTerm) || 
-            crypto.symbol.toLowerCase().includes(searchTerm)
-        );
-    }
-    
-    // Sort the filtered list
-    filteredCryptos.sort((a, b) => {
-        let comparison = 0;
-        
-        if (sortField === 'name') {
-            comparison = a.name.localeCompare(b.name);
-        } else if (sortField === 'price') {
-            comparison = a.price - b.price;
-        } else if (sortField === 'marketCap') {
-            comparison = a.marketCap - b.marketCap;
-        } else if (sortField === 'change') {
-            comparison = a.change - b.change;
-        }
-        
-        return sortDirection === 'asc' ? comparison : -comparison;
-    });
-    
-    return filteredCryptos;
-}
+let currentSortOption = '';
 
 // Event listener for chart symbol selector
 document.getElementById('chartSymbolSelector').addEventListener('change', function() {
@@ -154,22 +121,36 @@ async function init() {
     //     localStorage.setItem('cryptocurrencies', JSON.stringify(cryptocurrencies));
     // }
 
-    document.getElementById('cryptoSearch').addEventListener('input', function() {
-        currentSearchTerm = this.value;
-        renderCryptoList();
+    document.getElementById('cryptoSearch').addEventListener('keydown', async function(e) {
+        if(e.key === "Enter") {
+            let sebelumCurrentSearch = currentSearchTerm;
+            currentSearchTerm = this.value;
+    
+            if (sebelumCurrentSearch != this.value) {
+                await updateDashboard();
+            }
+        }
     });
 
-    document.getElementById('clearSearchBtn').addEventListener('click', function() {
+    document.getElementById('clearSearchBtn').addEventListener('click', async function() {
         document.getElementById('cryptoSearch').value = '';
+        let sebelumCurrentSearch = currentSearchTerm;
         currentSearchTerm = '';
-        renderCryptoList();
+
+        if(sebelumCurrentSearch != currentSearchTerm) {
+            await updateDashboard();
+        }
     });
 
     document.querySelectorAll('.sort-option').forEach(option => {
         option.addEventListener('click', function(e) {
             e.preventDefault();
+            let sebelumCurrentSort = currentSortOption;
             currentSortOption = this.dataset.sort;
-            renderCryptoList();
+
+            if(sebelumCurrentSort != this.dataset.sort) {
+                updateDashboard();
+            }
             
             // Update dropdown button text
             const sortText = this.textContent;
@@ -394,10 +375,12 @@ async function updateDashboard() {
     }
 
     if (!currentUser) return;
-
+    
     // Update user balance
     userBalanceElement.textContent = toFixedTrunc(currentUser.uang, 2);
-    
+
+    await updateKripto();
+
     // Update portfolio value
     await updatePortfolioValue();
     
@@ -411,21 +394,14 @@ async function updateDashboard() {
     await renderTransactionHistory();
 }
 
-// Calculate and update portfolio value
-async function updatePortfolioValue() {
-    if (!currentUser) return;
-    
-    let krip = await Kripto()
+async function updateKripto() {
+    let krip = await Kripto("", "");
 
-    let totalValue = 0;
-    const promises = currentUser.portfolio.map(async (item, i) => {
-        const crypto = krip.find(c => c.kuripto_id === item.mata_uang);
-        if (!crypto) return;
-
+    const promises = krip.map(async (crypto, i) => {
         if (crypto.apakah_asli) {
             try {
                 const data = await new Promise((resolve, reject) => {
-                    $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${item.mata_uang}&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH`)
+                    $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto.kuripto_id}&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH`)
                         .done(resolve)
                         .fail(reject);
                 });
@@ -434,27 +410,39 @@ async function updatePortfolioValue() {
                 crypto.change_24h = data[0].market_cap_change_percentage_24h;
                 crypto.harga = data[0].current_price;
 
-                KriptoYangAda[i].market_cap = crypto.market_cap;
-                KriptoYangAda[i].change_24h = crypto.change_24h;
-                KriptoYangAda[i].harga = crypto.harga;
+                krip[i].market_cap = crypto.market_cap;
+                krip[i].change_24h = crypto.change_24h;
+                krip[i].harga = crypto.harga;
             } catch (error) {
-                console.error(`Failed to fetch data for ${item.mata_uang}:`, error);
+                console.error(`Failed to fetch data for ${crypto.kuripto_id}:`, error);
             }
         }
-
-        totalValue += crypto.harga * item.jumlah;
     });
 
     await Promise.all(promises);
-    KriptoYangAda = krip;
+    KriptoYangAda = krip
+}
+
+// Calculate and update portfolio value
+async function updatePortfolioValue() {
+    let totalValue = 0;
+
+    currentUser.portfolio.forEach((item, i) => {
+        const crypto = KriptoYangAda.find(c => c.kuripto_id === item.mata_uang);
+        if (!crypto) return;
+
+        totalValue += crypto.harga * item.jumlah;
+    })
+
     portfolioValueElement.textContent = toFixedTrunc(totalValue, 2);
 }
 
 // Render cryptocurrency list
 async function renderCryptoList() {
+    let krip = await Kripto(currentSortOption, currentSearchTerm)
     cryptoList.innerHTML = '';
     
-    if (KriptoYangAda.length === 0) {
+    if (krip.length === 0) {
         cryptoList.innerHTML = `
             <tr>
                 <td colspan="6" class="text-center">No cryptocurrencies found</td>
@@ -463,8 +451,7 @@ async function renderCryptoList() {
         return;
     }
 
-    console.log(KriptoYangAda)
-    KriptoYangAda.forEach(async (crypto, i) => {
+    krip.forEach(async (crypto, i) => {
         const row = document.createElement('tr');
         
         const changeClass = crypto.change_24h >= 0 ? 'text-success' : 'text-danger';
@@ -501,7 +488,6 @@ async function renderCryptoList() {
     const chartSymbolSelector = document.getElementById("chartSymbolSelector");
     chartSymbolSelector.innerHTML = '<option value="GOLD">GOLD</option>';
     KriptoYangAda.forEach(kripto => {
-
         if(kripto.apakah_asli) {
             const option = document.createElement('option');
             option.innerHTML = `${kripto.nama} (${kripto.simbol} / USD)`;
@@ -757,7 +743,6 @@ function openBuyModal(cryptoId) {
     });
 
     document.getElementById('buySliderAmount').value = 0;
-    console.log(currentUser.uang)
     document.getElementById('buySliderAmount').setAttribute("max", currentUser.uang / crypto.harga);
     
     buyCryptoModal.show();
@@ -822,7 +807,6 @@ function openSellModal(cryptoId) {
     const crypto = KriptoYangAda.find(c => c.kuripto_id === cryptoId);
     if (!crypto) return;
     
-    console.log(currentUser.portfolio);
     const portfolioItem = currentUser.portfolio.find(item => item.mata_uang === cryptoId);
     if (!portfolioItem || portfolioItem.amount <= 0) {
         alert('You do not own any of this cryptocurrency');

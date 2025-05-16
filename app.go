@@ -20,8 +20,116 @@ type App struct {
 	Supabase *supa.Client
 }
 
-// XQH026A37M3ODQZP
-// ALPACA: Key: PKW8DH38SDM1EEL32EQ3 | Secret: Nk8eM22SIv1QrBBHzu2HtAermDY0yXDqknQkPGiq
+func insertionSort(kripto []models.Kripto, urutan string) {
+	for i := 1; i < len(kripto); i++ {
+		temp := kripto[i]
+		j := i - 1
+
+		urut := false
+		if urutan == "asc" {
+			urut = temp.MarketCap < kripto[j].MarketCap
+		} else if urutan == "desc" {
+			urut = temp.MarketCap > kripto[j].MarketCap
+		}
+
+		for j >= 0 && urut {
+			kripto[j+1] = kripto[j]
+			j--
+		}
+
+		kripto[j+1] = temp
+	}
+}
+
+func selectionSort(kripto []models.Kripto, urutan string) {
+	for i := 0; i < len(kripto)-1; i++ {
+		idx_kecilbesar := i
+
+		for j := i + 1; j < len(kripto); j++ {
+			urut := false
+
+			if urutan == "asc" {
+				urut = kripto[j].Harga < kripto[idx_kecilbesar].Harga
+			} else if urutan == "desc" {
+				urut = kripto[j].Harga > kripto[idx_kecilbesar].Harga
+			}
+
+			if urut {
+				idx_kecilbesar = j
+			}
+		}
+
+		temp := kripto[i]
+		kripto[i] = kripto[idx_kecilbesar]
+		kripto[idx_kecilbesar] = temp
+	}
+}
+
+func bubbleSort(kripto []models.Kripto, urutan string) {
+	for i := 0; i < len(kripto)-1; i++ {
+		for j := 0; j < len(kripto)-i-1; j++ {
+			urut := false
+
+			if urutan == "asc" {
+				urut = kripto[j].Nama > kripto[j+1].Nama
+			} else if urutan == "desc" {
+				urut = kripto[j].Nama < kripto[j+1].Nama
+			}
+
+			if urut {
+				temp := kripto[j+1]
+				kripto[j+1] = kripto[j]
+				kripto[j] = temp
+			}
+		}
+	}
+}
+
+func sequentialSort(kripto []models.Kripto, yangDiCari string) int {
+	ketemu := -1
+
+	for i := 0; i < len(kripto) && ketemu == -1; i++ {
+		fmt.Println("CARI DULUUU")
+		if kripto[i].Nama == yangDiCari {
+			ketemu = i
+		}
+	}
+
+	return ketemu
+}
+
+func binarySearch(kripto []models.Kripto, yangDiCari string, urutan string) int {
+	var kiri, kanan, tengah int
+	ketemu := -1
+	kiri = 0
+	kanan = len(kripto) - 1
+
+	for kiri <= kanan && ketemu == -1 {
+		tengah = (kanan + kiri) / 2
+		fmt.Println(tengah)
+
+		if kripto[tengah].Nama == yangDiCari {
+			ketemu = tengah
+		}
+
+		if urutan == "asc" {
+			if kripto[tengah].Nama < yangDiCari {
+				kiri = tengah + 1
+			} else {
+				kanan = tengah - 1
+			}
+		} else if urutan == "desc" {
+			if kripto[tengah].Nama > yangDiCari {
+				kiri = tengah + 1
+			} else {
+				kanan = tengah - 1
+			}
+		}
+	}
+
+	fmt.Println("KETEMU", kripto, ketemu, yangDiCari, urutan, kanan, kiri)
+	return ketemu
+}
 
 var akun models.Akun = models.Akun{ID: -1, Username: "", Email: "", PasswordHash: "", FullName: "", Uang: 0, CreatedAt: ""}
 var ctx context.Context
@@ -145,7 +253,7 @@ func (a *App) Transaksi() []models.Transaksi {
 	return transaksi
 }
 
-func (a *App) Kripto() []models.Kripto {
+func (a *App) Kripto(sort, cari string) []models.Kripto {
 	var kripto []models.Kripto
 
 	err := a.Supabase.DB.From("kripto").Select().Execute(&kripto)
@@ -154,7 +262,49 @@ func (a *App) Kripto() []models.Kripto {
 		return []models.Kripto{}
 	}
 
-	fmt.Println(kripto)
+	if sort == "marketCap-asc" {
+		insertionSort(kripto, "asc")
+	}
+
+	if sort == "marketCap-desc" {
+		insertionSort(kripto, "desc")
+	}
+
+	if sort == "price-asc" {
+		selectionSort(kripto, "asc")
+	}
+
+	if sort == "price-desc" {
+		selectionSort(kripto, "desc")
+	}
+
+	urutan := ""
+	if sort == "name-asc" {
+		bubbleSort(kripto, "asc")
+		urutan = "asc"
+	}
+
+	if sort == "name-desc" {
+		bubbleSort(kripto, "desc")
+		urutan = "desc"
+	}
+
+	if cari != "" {
+		posisi := -1
+
+		if sort == "name-asc" || sort == "name-desc" {
+			posisi = binarySearch(kripto, cari, urutan)
+		} else {
+			posisi = sequentialSort(kripto, cari)
+		}
+
+		var duplikatKripto = []models.Kripto{}
+		if posisi != -1 {
+			duplikatKripto = append(duplikatKripto, kripto[posisi])
+		}
+
+		kripto = duplikatKripto
+	}
 
 	return kripto
 }
