@@ -55,14 +55,15 @@ function toFixedTrunc(x, digits) {
 }
 
 // TradingView Widget Integration
-function loadTradingViewWidget(symbol = 'GOLD') {
+let SimbolDiPilih = 'GOLD'
+function loadTradingViewWidget() {
     // Clear previous widget if exists
     document.getElementById('tradingview_widget_container').innerHTML = '';
     
     new TradingView.widget({
         "width": "100%",
         "height": "100%",
-        "symbol": symbol,
+        "symbol": SimbolDiPilih,
         "interval": "D",
         "timezone": "Etc/UTC",
         "theme": "light",
@@ -80,7 +81,8 @@ let currentSortOption = '';
 
 // Event listener for chart symbol selector
 document.getElementById('chartSymbolSelector').addEventListener('change', function() {
-    loadTradingViewWidget(this.value);
+    SimbolDiPilih = this.value;
+    loadTradingViewWidget();
 });
 
 // Initialize the app
@@ -102,24 +104,9 @@ async function init() {
         // Initialize TradingView widget
         loadTradingViewWidget();
     }
-    // Check if user is logged in
-    // const loggedInUser = JSON.parse(localStorage.getItem('currentUser'));
-    // if (loggedInUser) {
-    //     currentUser = loggedInUser;
-    //     showSection(indexSection);
-    //     updateDashboard();
-        
-    //     // Initialize TradingView widget
-    //     loadTradingViewWidget();
-    // }
-    
+
     // Update navbar based on login status
     updateNavbar();
-    
-    // Save initial data if not exists
-    // if (!localStorage.getItem('cryptocurrencies')) {
-    //     localStorage.setItem('cryptocurrencies', JSON.stringify(cryptocurrencies));
-    // }
 
     document.getElementById('cryptoSearch').addEventListener('keydown', async function(e) {
         if(e.key === "Enter") {
@@ -451,7 +438,10 @@ async function renderCryptoList() {
         return;
     }
 
-    krip.forEach(async (crypto, i) => {
+    krip.forEach(async (item, i) => {
+        const crypto = KriptoYangAda.find(c => c.kuripto_id === item.kuripto_id);
+        if (!crypto) return;
+        
         const row = document.createElement('tr');
         
         const changeClass = crypto.change_24h >= 0 ? 'text-success' : 'text-danger';
@@ -487,28 +477,27 @@ async function renderCryptoList() {
 
     const chartSymbolSelector = document.getElementById("chartSymbolSelector");
     chartSymbolSelector.innerHTML = '<option value="GOLD">GOLD</option>';
+    let apakahAda = false;
     KriptoYangAda.forEach(kripto => {
         if(kripto.apakah_asli) {
             const option = document.createElement('option');
             option.innerHTML = `${kripto.nama} (${kripto.simbol} / USD)`;
             option.setAttribute("value", kripto.simbol+"USD");
+
+            if(kripto.simbol + "USD" === SimbolDiPilih) {
+                apakahAda = true;
+                chartSymbolSelector.value = SimbolDiPilih;
+            }
     
             chartSymbolSelector.appendChild(option);
         }
     });
+
+    if(!apakahAda) {
+        SimbolDiPilih = "GOLD";
+    }
     
-    // Add event listeners to buttons
-    // document.querySelectorAll('.buy-btn').forEach(btn => {
-    //     btn.addEventListener('click', () => openBuyModal(parseInt(btn.dataset.id)));
-    // });
-    
-    // document.querySelectorAll('.edit-btn').forEach(btn => {
-    //     btn.addEventListener('click', () => openEditModal(parseInt(btn.dataset.id)));
-    // });
-    
-    // document.querySelectorAll('.delete-btn').forEach(btn => {
-    //     btn.addEventListener('click', () => deleteCrypto(parseInt(btn.dataset.id)));
-    // });
+    loadTradingViewWidget();
 }
 
 // Render user portfolio
@@ -773,30 +762,6 @@ document.getElementById('confirmBuyBtn').addEventListener('click', async () => {
         alert(`Error when buying crypto! ${hasil.status}`);
         return;
     }
-    
-    // Update user balance
-    // currentUser.uang -= total;
-    
-    // Update portfolio
-    // const portfolioItem = currentUser.portfolio.find(item => item.cryptoId === cryptoId);
-    // if (portfolioItem) {
-    //     portfolioItem.amount += amount;
-    // } else {
-    //     currentUser.portfolio.push({
-    //         cryptoId,
-    //         amount
-    //     });
-    // }
-    
-    // // Add transaction
-    // currentUser.transactions.push({
-    //     date: Date.now(),
-    //     type: 'buy',
-    //     cryptoId,
-    //     amount,
-    //     price: crypto.price,
-    //     total
-    // });
 
     buyCryptoModal.hide();
     updateDashboard();

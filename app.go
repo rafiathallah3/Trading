@@ -89,7 +89,6 @@ func sequentialSort(kripto []models.Kripto, yangDiCari string) int {
 	ketemu := -1
 
 	for i := 0; i < len(kripto) && ketemu == -1; i++ {
-		fmt.Println("CARI DULUUU")
 		if kripto[i].Nama == yangDiCari {
 			ketemu = i
 		}
@@ -106,7 +105,6 @@ func binarySearch(kripto []models.Kripto, yangDiCari string, urutan string) int 
 
 	for kiri <= kanan && ketemu == -1 {
 		tengah = (kanan + kiri) / 2
-		fmt.Println(tengah)
 
 		if kripto[tengah].Nama == yangDiCari {
 			ketemu = tengah
@@ -127,7 +125,6 @@ func binarySearch(kripto []models.Kripto, yangDiCari string, urutan string) int 
 		}
 	}
 
-	fmt.Println("KETEMU", kripto, ketemu, yangDiCari, urutan, kanan, kiri)
 	return ketemu
 }
 
@@ -147,6 +144,10 @@ func DapatinHarga(uang string) models.CryptoResponse {
 
 	if err != nil {
 		fmt.Println(err, "ERRORRR")
+		return models.CryptoResponse{CurrentPrice: 0}
+	}
+
+	if len(hasil) <= 0 {
 		return models.CryptoResponse{CurrentPrice: 0}
 	}
 
@@ -189,6 +190,7 @@ func (a *App) Register(username, email, password, confirmPassword string) models
 		Email:        email,
 		PasswordHash: string(bytes),
 		FullName:     username,
+		Uang:         1000,
 		CreatedAt:    time.Now().UTC().Format(time.RFC3339), //time.Now().UTC()
 	}
 
@@ -217,8 +219,6 @@ func (a *App) Login(username, password string) models.StatusAutentikasi {
 		fmt.Println(err)
 		return models.StatusAutentikasi{Status: "Password or Username is Incorrect!", Akun: models.Akun{}}
 	}
-
-	fmt.Println(akun)
 
 	return models.StatusAutentikasi{Status: "Success", Akun: akun}
 }
@@ -366,12 +366,10 @@ func (a *App) BuatKripto(kriptoClient models.Kripto) string {
 func (a *App) EditKripto(kriptoClient models.Kripto) string {
 	var kripto []models.Kripto
 
-	fmt.Println(kriptoClient, "KLIENT")
 	err := a.Supabase.DB.From("kripto").Select().Eq("kuripto_id", kriptoClient.KuriptoID).Execute(&kripto)
 	if err != nil || len(kripto) <= 0 {
 		return "Gk ketemu " + err.Error()
 	}
-	fmt.Println(kripto, "SEBELUM UPDATE")
 
 	err = a.Supabase.DB.From("kripto").Update(models.Kripto{
 		ID:         kripto[0].ID,
@@ -387,7 +385,6 @@ func (a *App) EditKripto(kriptoClient models.Kripto) string {
 	if err != nil {
 		return err.Error()
 	}
-	fmt.Println(kripto, "SETELAH UPDATE")
 
 	return "Sukses"
 }
@@ -412,7 +409,6 @@ func (a *App) Beli(uang, jumlah_raw string) models.StatusTransaksi {
 	hasil := DapatinHarga(uang)
 
 	if hasil.CurrentPrice == 0 {
-		fmt.Println("TIDAK BISA")
 		return models.StatusTransaksi{Status: "Error, please try again.", Akun: akun}
 	}
 
