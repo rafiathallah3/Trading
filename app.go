@@ -140,7 +140,7 @@ func DapatinHarga(uang string) models.CryptoResponse {
 	}
 
 	var hasil []models.CryptoResponse
-	err := requests.URL(fmt.Sprintf("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=%s&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH", uang)).ToJSON(&hasil).Fetch(ctx)
+	err := requests.URL(fmt.Sprintf("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=%s&x_cg_demo_api_key=CG-yYG9FmMVNXk1VuXf2FriEpyf", uang)).ToJSON(&hasil).Fetch(ctx)
 
 	if err != nil {
 		fmt.Println(err, "ERRORRR")

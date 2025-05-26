@@ -153,7 +153,7 @@ async function init() {
             return;
         }
 
-        $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${kriptoID.value}&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH`, data => {
+        $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${kriptoID.value}&x_cg_demo_api_key=CG-yYG9FmMVNXk1VuXf2FriEpyf`, data => {
             if(data.length <= 0) {
                 updateTambahKripto({});
                 alert(`Symbol: ${kriptoID.value} is not found!`);
@@ -165,7 +165,7 @@ async function init() {
         });
     });
 
-    $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=&per_page=250&page=1&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH`, data => {
+    $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=&per_page=250&page=1&x_cg_demo_api_key=CG-yYG9FmMVNXk1VuXf2FriEpyf`, data => {
         ListKripto = data;
         const input = document.getElementById("cryptoID");
         const list = document.getElementById("autocompleteList");
@@ -388,7 +388,7 @@ async function updateKripto() {
         if (crypto.apakah_asli) {
             try {
                 const data = await new Promise((resolve, reject) => {
-                    $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto.kuripto_id}&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH`)
+                    $.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto.kuripto_id}&x_cg_demo_api_key=CG-yYG9FmMVNXk1VuXf2FriEpyf`)
                         .done(resolve)
                         .fail(reject);
                 });
@@ -495,9 +495,7 @@ async function renderCryptoList() {
 
     if(!apakahAda) {
         SimbolDiPilih = "GOLD";
-    }
-    
-    loadTradingViewWidget();
+    }    
 }
 
 // Render user portfolio
@@ -973,7 +971,7 @@ setInterval(updateDashboard, 30000);
 
 //     try {
 //         Portfolio().then(hasil => {
-//             $.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH", data => {
+//             $.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&x_cg_demo_api_key=CG-yYG9FmMVNXk1VuXf2FriEpyf", data => {
 //                 const HargaBitcoin = data[0].current_price;
                 
 //                 TotalPortfolio = 0;
@@ -1085,7 +1083,7 @@ setInterval(updateDashboard, 30000);
 //         $("#RangeBeli").val(0);
 //         $("#JumlahBeli").text(`Bitcoin: 0`);
 //         $("#StatusBeli").addClass("d-none");
-//         $.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH", data => {
+//         $.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&x_cg_demo_api_key=CG-yYG9FmMVNXk1VuXf2FriEpyf", data => {
 //             $("#RangeBeli").attr("max", Akun.uang / data[0].current_price);
 //         });
 //     });
@@ -1098,7 +1096,7 @@ setInterval(updateDashboard, 30000);
 //         $("#JumlahJualBitcoin").text(`Bitcoin: 0`);
 //         $("#StatusJual").addClass("d-none");
 //         $("#RangeJual").attr("max", TotalPortfolio);
-//         $.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&x_cg_demo_api_key=CG-RtuF9UDUxQez9q4TRGSpkkGH", data => {
+//         $.get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&x_cg_demo_api_key=CG-yYG9FmMVNXk1VuXf2FriEpyf", data => {
 //             HargaBitcoin = data[0].current_price;
 //         });
 //     });
